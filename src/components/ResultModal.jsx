@@ -1,13 +1,17 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { createPortal } from "react-dom";
 
 const ResultModal = forwardRef(function ResultModal(
-  { result, targetTime },
+  { targetTime, remainingTime, onReset },
   ref
 ) {
   // Create a ref for the <dialog> element
   const dialog = useRef();
 
-  // Expose an imperative handle to allow the parent component to control the dialog
+  const userLost = remainingTime <= 0;
+  const formattedRemainingTime = (remainingTime / 1000).toFixed(2);
+  const score = Math.round((1 - remainingTime / (targetTime * 1000)) * 100);
+
   useImperativeHandle(ref, () => ({
     open() {
       dialog.current.showModal();
@@ -17,19 +21,22 @@ const ResultModal = forwardRef(function ResultModal(
     },
   }));
 
-  return (
+  return createPortal(
     <dialog ref={dialog} className="result-modal">
-      <h1>You {result}</h1>
+      {userLost && <h2>You Lost</h2>}
+      {!userLost && <h2>Your Score: {score}</h2>}
       <p>
         The target time was <strong>{targetTime} seconds</strong>
       </p>
       <p>
-        You stopped the timer with <strong>X sec left.</strong>
+        You stopped the timer with{" "}
+        <strong>{formattedRemainingTime} sec left.</strong>
       </p>
-      <form method="dialog">
+      <form method="dialog" onSubmit={onReset}>
         <button>Close</button>
       </form>
-    </dialog>
+    </dialog>,
+    document.getElementById("modal")
   );
 });
 
