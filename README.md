@@ -1,1 +1,1 @@
-![Alt text](./screen&image.jpg)
+![Alt text](./screen%20image.jpg)
